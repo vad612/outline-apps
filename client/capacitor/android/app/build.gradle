@@ -12,16 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+
 apply plugin: 'com.android.application'
 
 def tvBannerSource = file("${rootProject.projectDir}/../../resources/icons/android/tv_banner.png")
-def tvBannerResources = file("${buildDir}/generated/res/tv")
 
-def copyTvBanner = tasks.register('copyTvBanner', Sync) {
-    from(tvBannerSource) {
-        into('drawable-xhdpi')
+abstract class CopyTvBannerTask extends DefaultTask {
+    @InputFile
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract RegularFileProperty getSourceFile()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDirectory()
+
+    @TaskAction
+    void copyBanner() {
+        project.sync {
+            from(sourceFile) {
+                into('drawable-xhdpi')
+            }
+            into(outputDirectory)
+        }
     }
-    into(tvBannerResources)
+}
+
+def copyTvBanner = tasks.register('copyTvBanner', CopyTvBannerTask) {
+    sourceFile.set(tvBannerSource)
 }
 
 android {
@@ -59,7 +83,7 @@ android {
 androidComponents {
     onVariants(selector().all()) { variant ->
         variant.sources.res.addGeneratedSourceDirectory(copyTvBanner) {
-            project.objects.directoryProperty().fileValue(tvBannerResources)
+            it.outputDirectory
         }
     }
 }
