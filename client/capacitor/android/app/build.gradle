@@ -43,10 +43,6 @@ android {
         versionName "1.0"
     }
 
-    sourceSets {
-        main.res.srcDir(copyTvBanner)
-    }
-    
     buildTypes {
         release {
             minifyEnabled false
@@ -57,6 +53,14 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.sources.res.addGeneratedSourceDirectory(copyTvBanner) {
+            project.objects.directoryProperty().fileValue(tvBannerResources)
+        }
     }
 }
 
