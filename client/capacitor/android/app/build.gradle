@@ -18,8 +18,10 @@ def tvBannerSource = file("${rootProject.projectDir}/../../resources/icons/andro
 def tvBannerResources = file("${buildDir}/generated/res/tv")
 
 def copyTvBanner = tasks.register('copyTvBanner', Sync) {
-    from(tvBannerSource)
-    into(new File(tvBannerResources, 'drawable-xhdpi'))
+    from(tvBannerSource) {
+        into('drawable-xhdpi')
+    }
+    into(tvBannerResources)
 }
 
 android {
